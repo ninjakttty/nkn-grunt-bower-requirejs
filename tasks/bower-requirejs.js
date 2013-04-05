@@ -8,7 +8,9 @@ module.exports = function (grunt) {
 		var cb = this.async();
 		var excludes = this.options({exclude: []}).exclude;
 		var filePath = this.data.rjsConfig;
+		var baseUrl = this.data.baseUrl || this.data.rjsConfig;
 		var file = grunt.file.read(filePath);
+		var index = 0;
 
 		require('bower').commands.list({paths: true})
 			.on('data', function (data) {
@@ -21,8 +23,10 @@ module.exports = function (grunt) {
 							delete obj[key];
 							return;
 						}
-
-						obj[key] = grunt.file.isDir(val) ? val : val.replace(/\.js$/, '');
+						if (baseUrl) {
+							index = val.indexOf(baseUrl);
+						}
+						obj[key] = grunt.file.isDir(val) ? val.substring(index, val.length) + "/" + key.replace(/-amd/, '') : val.substring(index, val.length).replace(/\.js$/, '');
 					});
 
 					requirejs.tools.useLib(function (require) {
